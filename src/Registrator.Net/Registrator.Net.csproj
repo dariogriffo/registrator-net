@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <!-- General -->
+        <Description>A simple AutoRegistration tool for dotnet</Description>
+        <Copyright>Copyright 2024 Dario Griffo</Copyright>
+        <Authors>Dario Griffo</Authors>
+        <Company>https://github.com/dariogriffo</Company>
+        <NeutralLanguage>en-GB</NeutralLanguage>
+
+        <!-- Build settings -->
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <DebugType>portable</DebugType>
+        <OutputType>Library</OutputType>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+
+        <!-- NuGet settings -->
+        <PackageId>Registrator.Net</PackageId>
+        <PackageTags>ServiceCollection, Dependency Injection, Auto Registration</PackageTags>
+        <PackageReleaseNotes>https://github.com/dariogriffo/registrator-net/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
+        <PackageProjectUrl>https://github.com/dariogriffo/registrator-net</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>images\icon.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/dariogriffo/registrator-net</RepositoryUrl>
+        <Version>1.0.0</Version>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <!-- SourceLink settings -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <NoWarn>FS2003;FS0044</NoWarn>
+
+    </PropertyGroup>
+
+
+    <ItemGroup>
+
+        <None Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="license">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Include="$(SolutionDir)README.md" Pack="true" PackagePath="\">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Include="images\icon.png" Pack="true" PackagePath="images">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.0.0,)" />
+    </ItemGroup>
+    
+
+
+</Project>
