@@ -2,6 +2,7 @@
 namespace Registrator.Net.Tests;
 
 using FluentAssertions;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -182,5 +183,21 @@ public class ServiceCollectionExtensionsTests
         interface17.Should().NotBe(interface17_1);
         interface18.Should().NotBe(interface18_1);
         service.Should().BeNull();
+    }
+
+    [Fact]
+    public void AutoRegisterInterfaces_WithExcludedAssemblies_DoesNotRegisterExcludedAssembliesInterfaces()
+    {
+        ServiceCollection services = new();
+        services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
+        {
+            Assemblies = [typeof(ConcreteType).Assembly],
+            ExcludedAssemblies = [typeof(IRequestHandler<>).Assembly]
+        });
+
+        ServiceProvider provider = services.BuildServiceProvider();
+        IRequestHandler<CreateUser>? handler = provider.GetService<IRequestHandler<CreateUser>>();
+
+        handler.Should().BeNull();
     }
 }

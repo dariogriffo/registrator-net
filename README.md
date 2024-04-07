@@ -13,10 +13,14 @@ A simple yet effective AutoRegistration tool for dotnet
 
 
 ## Table of contents
-
+- [Notes](#notes)
 - [About](#about)
 - [Getting Started](#getting-started)
 - [License](#license)
+
+## Notes
+
+Doesn't support automatic registration of generic types, you will have to register them manually.
 
 ## About
 

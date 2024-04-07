@@ -20,13 +20,40 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AutoRegisterTypesInAssemblies(
         this IServiceCollection services,
-        params Assembly[] assemblies
-    )
+        params Assembly[] assemblies)
     {
-        if (assemblies.Length == 0)
+        return services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
+        {
+            Assemblies = assemblies
+        });
+    }
+
+    /// <summary>
+    /// Automatically registers types in the specified assemblies with the DI container.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">The configuration for Registrator</param>
+    /// <returns></returns>
+    public static IServiceCollection AutoRegisterTypesInAssemblies(
+        this IServiceCollection services,
+        RegistratorConfiguration configuration)
+    {
+        if (configuration.Assemblies.Length == 0)
         {
             return services;
         }
+
+        Assembly[] assemblies = configuration.Assemblies;
+
+        HashSet<Type> excludedInterfaces = configuration.ExcludedAssemblies?.SelectMany(assembly =>
+            assembly.GetTypes().Where(t => t.IsInterface)).Distinct().ToHashSet() ?? Array.Empty<Type>().ToHashSet();
+
+        HashSet<Type> defaultExcludedInterfaces = new()
+        {
+            typeof(IDisposable), typeof(IAsyncDisposable), typeof(ISerializable)
+        };
+
+        excludedInterfaces.UnionWith(defaultExcludedInterfaces);
 
         foreach (Assembly assembly in assemblies)
         {
@@ -46,11 +73,10 @@ public static class ServiceCollectionExtensions
             {
                 AutoRegisterInterfaces attribute = type.GetCustomAttribute<AutoRegisterInterfaces>()!;
                 List<Type> interfacesToRegister = type.GetInterfaces()
-                    .Where(@interface =>
-                        @interface != typeof(IDisposable)
-                        && @interface != typeof(IAsyncDisposable)
-                        && @interface != typeof(ISerializable)
-                    ).ToList();
+                    .Where(@interface => !excludedInterfaces.Contains(@interface))
+                    .Where(@interface => !(@interface.IsGenericType &&
+                                         excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())))
+                    .ToList();
 
                 if (attribute.Lifetime == ServiceLifetime.Transient)
                 {
@@ -73,7 +99,8 @@ public static class ServiceCollectionExtensions
 
                     foreach (Type @interface in interfacesToRegister.Skip(1))
                     {
-                        services.Add(new ServiceDescriptor(@interface, sp => sp.GetRequiredService(type0), attribute.Lifetime));
+                        services.Add(new ServiceDescriptor(@interface, sp => sp.GetRequiredService(type0),
+                            attribute.Lifetime));
                     }
                 }
             }
@@ -87,12 +114,11 @@ public static class ServiceCollectionExtensions
                 AutoRegisterTypeAndInterfaces attribute =
                     type.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
                 services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
-                IEnumerable<Type> interfacesToRegister = type.GetInterfaces()
-                    .Where(@interface =>
-                        @interface != typeof(IDisposable)
-                        && @interface != typeof(IAsyncDisposable)
-                        && @interface != typeof(ISerializable)
-                    );
+                List<Type> interfacesToRegister = type.GetInterfaces()
+                    .Where(@interface => !excludedInterfaces.Contains(@interface))
+                    .Where(@interface => !(@interface.IsGenericType &&
+                                           excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())))
+                    .ToList();
                 foreach (Type @interface in interfacesToRegister)
                 {
                     services.Add(
