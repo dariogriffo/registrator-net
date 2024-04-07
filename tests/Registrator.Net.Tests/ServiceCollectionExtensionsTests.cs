@@ -192,7 +192,7 @@ public class ServiceCollectionExtensionsTests
         services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
         {
             Assemblies = [typeof(ConcreteType).Assembly],
-            ExcludedAssemblies = [typeof(IRequestHandler<>).Assembly]
+            ExcludedAssemblies = [typeof(IRequestHandler<>).Assembly,typeof(IMediator).Assembly]
         });
 
         ServiceProvider provider = services.BuildServiceProvider();

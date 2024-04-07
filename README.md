@@ -46,6 +46,17 @@ Tag classes, records and structs with any of the following attributes:
 
 Then in your Program.cs or Startup.cs, call `services.AutoRegisterTypesInAssemblies(assembly1,assembly2,assembly3...);`
 
+If you want to skip the registration of types that implement a certain interface from a certain assembly, 
+you can call 
+```csharp
+services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
+{
+    Assemblies = [typeof(ConcreteType).Assembly],
+    ExcludedAssemblies = [typeof(IRequestHandler<>).Assembly,typeof(IMediator).Assembly]
+});
+```
+
+
 By default all registered types are registered as `ServiceLifetime.Scoped`, but you can change it by passing a `ServiceLifetime` as a parameter of the attribute.
 
 ## License
