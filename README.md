@@ -5,7 +5,7 @@
 A simple yet effective AutoRegistration tool for dotnet
 
 [![NuGet Info](https://buildstats.info/nuget/Registrator.Net?includePreReleases=true)](https://www.nuget.org/packages/Registrator.Net/)
-[![GitHub license](https://img.shields.io/github/license/dariogriffo/registator-net.svg)](https://raw.githubusercontent.com/dariogriffo/registator-net/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/dariogriffo/registator-net.svg)](https://raw.githubusercontent.com/dariogriffo/registator-net/main/LICENSE)
 ### Build Status
 ![.Net8.0](https://github.com/dariogriffo/registator-net/workflows/.NET/badge.svg?branch=main)
 
