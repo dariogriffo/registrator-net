@@ -1,11 +1,11 @@
 namespace Registrator.Net;
 
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Extension methods for <see cref="IServiceCollection"/>.
@@ -20,12 +20,12 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AutoRegisterTypesInAssemblies(
         this IServiceCollection services,
-        params Assembly[] assemblies)
+        params Assembly[] assemblies
+    )
     {
-        return services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
-        {
-            Assemblies = assemblies
-        });
+        return services.AutoRegisterTypesInAssemblies(
+            new RegistratorConfiguration() { Assemblies = assemblies }
+        );
     }
 
     /// <summary>
@@ -36,7 +36,8 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AutoRegisterTypesInAssemblies(
         this IServiceCollection services,
-        RegistratorConfiguration configuration)
+        RegistratorConfiguration configuration
+    )
     {
         if (configuration.Assemblies.Length == 0)
         {
@@ -45,81 +46,82 @@ public static class ServiceCollectionExtensions
 
         Assembly[] assemblies = configuration.Assemblies;
 
-        HashSet<Type> excludedInterfaces = configuration.ExcludedAssemblies?.SelectMany(assembly =>
-            assembly.GetTypes().Where(t => t.IsInterface)).Distinct().ToHashSet() ?? Array.Empty<Type>().ToHashSet();
+        IEnumerable<Type> excludedInterfacesFromInterfaces = configuration
+            .ExcludedAssemblies.SelectMany(assembly =>
+                assembly.GetTypes().Where(t => t.IsInterface)
+            )
+            .Distinct();
 
-        HashSet<Type> defaultExcludedInterfaces = new()
-        {
-            typeof(IDisposable), typeof(IAsyncDisposable), typeof(ISerializable)
-        };
+        HashSet<Type> excludedInterfaces =
+        [
+            typeof(IDisposable),
+            typeof(IAsyncDisposable),
+            typeof(ISerializable),
+        ];
 
-        excludedInterfaces.UnionWith(defaultExcludedInterfaces);
+        excludedInterfaces.UnionWith(excludedInterfacesFromInterfaces);
 
         foreach (Assembly assembly in assemblies)
         {
-            List<Type> types = assembly
-                .GetTypes()
-                .Where(t => t.GetCustomAttributes<AutoRegisterType>().Any()).ToList();
-            foreach (Type type in types)
+            List<Type> types = [];
+            List<Type> interfaces = [];
+            List<Type> typesAndInterfaces = [];
+            foreach (var t in assembly.GetTypes())
             {
-                AutoRegisterType attribute = type.GetCustomAttribute<AutoRegisterType>()!;
-                services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
-            }
-
-            types = assembly
-                .GetTypes()
-                .Where(t => t.GetCustomAttributes<AutoRegisterInterfaces>().Any()).ToList();
-            foreach (Type type in types)
-            {
-                AutoRegisterInterfaces attribute = type.GetCustomAttribute<AutoRegisterInterfaces>()!;
-                List<Type> interfacesToRegister = type.GetInterfaces()
-                    .Where(@interface => !excludedInterfaces.Contains(@interface))
-                    .Where(@interface => !(@interface.IsGenericType &&
-                                         excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())))
-                    .ToList();
-
-                if (attribute.Lifetime == ServiceLifetime.Transient)
+                if (t.GetCustomAttributes<AutoRegisterType>().Any())
                 {
-                    //All the resolved instances must be different
-                    foreach (Type @interface in interfacesToRegister)
-                    {
-                        services.Add(new ServiceDescriptor(@interface, type, attribute.Lifetime));
-                    }
+                    types.Add(t);
                 }
-                else
+
+                if (t.GetCustomAttributes<AutoRegisterInterfaces>().Any())
                 {
-                    //All the resolved instances must be resolved to the same instance
-                    Type type0 = interfacesToRegister.FirstOrDefault();
-                    if (type0 is null)
-                    {
-                        continue;
-                    }
+                    interfaces.Add(t);
+                }
 
-                    services.Add(new ServiceDescriptor(type0, type, attribute.Lifetime));
-
-                    foreach (Type @interface in interfacesToRegister.Skip(1))
-                    {
-                        services.Add(new ServiceDescriptor(@interface, sp => sp.GetRequiredService(type0),
-                            attribute.Lifetime));
-                    }
+                if (t.GetCustomAttributes<AutoRegisterTypeAndInterfaces>().Any())
+                {
+                    typesAndInterfaces.Add(t);
                 }
             }
 
-            types = assembly
-                .GetTypes()
-                .Where(t => t.GetCustomAttributes<AutoRegisterTypeAndInterfaces>().Any()).ToList();
+            AutoRegisterTypes(types, services);
 
-            foreach (Type type in types)
+            AutoRegisterInterfaces(interfaces, services, excludedInterfaces);
+
+            AutoRegisterTypeAndInterfaces(typesAndInterfaces, services, excludedInterfaces);
+        }
+
+        return services;
+    }
+
+    private static void AutoRegisterTypeAndInterfaces(
+        List<Type> types,
+        IServiceCollection services,
+        HashSet<Type> excludedInterfaces
+    )
+    {
+        foreach (Type type in types)
+        {
+            AutoRegisterTypeAndInterfaces attribute =
+                type.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
+            services.Add(
+                attribute.Key is null
+                    ? new ServiceDescriptor(type, type, attribute.Lifetime)
+                    : new ServiceDescriptor(type, attribute.Key, type, attribute.Lifetime)
+            );
+
+            List<Type> interfacesToRegister = type.GetInterfaces()
+                .Where(@interface => !excludedInterfaces.Contains(@interface))
+                .Where(@interface =>
+                    !(
+                        @interface.IsGenericType
+                        && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
+                    )
+                )
+                .ToList();
+            foreach (Type @interface in interfacesToRegister)
             {
-                AutoRegisterTypeAndInterfaces attribute =
-                    type.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
-                services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
-                List<Type> interfacesToRegister = type.GetInterfaces()
-                    .Where(@interface => !excludedInterfaces.Contains(@interface))
-                    .Where(@interface => !(@interface.IsGenericType &&
-                                           excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())))
-                    .ToList();
-                foreach (Type @interface in interfacesToRegister)
+                if (attribute.Key is null)
                 {
                     services.Add(
                         new ServiceDescriptor(
@@ -129,9 +131,143 @@ public static class ServiceCollectionExtensions
                         )
                     );
                 }
+                else
+                {
+                    services.Add(
+                        new ServiceDescriptor(
+                            @interface,
+                            attribute.Key,
+                            (sp, o) => sp.GetRequiredKeyedService(type, o),
+                            attribute.Lifetime
+                        )
+                    );
+                }
             }
         }
+    }
 
-        return services;
+    private static void AutoRegisterInterfaces(
+        List<Type> types,
+        IServiceCollection services,
+        HashSet<Type> excludedInterfaces
+    )
+    {
+        foreach (Type type in types)
+        {
+            AutoRegisterInterfaces attribute = type.GetCustomAttribute<AutoRegisterInterfaces>()!;
+            List<Type> interfacesToRegister = type.GetInterfaces()
+                .Where(@interface => !excludedInterfaces.Contains(@interface))
+                .Where(@interface =>
+                    !(
+                        @interface.IsGenericType
+                        && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
+                    )
+                )
+                .ToList();
+
+            if (attribute.Lifetime == ServiceLifetime.Transient)
+            {
+                //All the resolved instances must be different
+                foreach (Type @interface in interfacesToRegister)
+                {
+                    if (attribute.Key is null)
+                    {
+                        services.Add(new ServiceDescriptor(@interface, type, attribute.Lifetime));
+                    }
+                    else
+                    {
+                        services.Add(
+                            new ServiceDescriptor(
+                                @interface,
+                                attribute.Key,
+                                type,
+                                attribute.Lifetime
+                            )
+                        );
+                    }
+                }
+            }
+            else
+            {
+                Type? type0 = interfacesToRegister.FirstOrDefault();
+                if (type0 is null)
+                {
+                    continue;
+                }
+
+                if (attribute.Key is null)
+                {
+                    //All the resolved instances must be resolved to the same instance
+                    services.Add(new ServiceDescriptor(type0, type, attribute.Lifetime));
+
+                    IEnumerable<Type> otherInterfaces = interfacesToRegister.Skip(1);
+                    foreach (Type @interface in otherInterfaces)
+                    {
+                        services.Add(
+                            new ServiceDescriptor(
+                                @interface,
+                                sp => sp.GetRequiredService(type0),
+                                attribute.Lifetime
+                            )
+                        );
+                    }
+                }
+                else
+                {
+                    //All the resolved instances must be resolved to the same instance
+                    services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
+
+                    IEnumerable<Type> otherInterfaces = interfacesToRegister;
+                    foreach (Type @interface in otherInterfaces)
+                    {
+                        services.Add(
+                            new ServiceDescriptor(
+                                @interface,
+                                attribute.Key,
+                                (sp, _) => sp.GetRequiredService(type),
+                                attribute.Lifetime
+                            )
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    private static void AutoRegisterTypes(List<Type> types, IServiceCollection services)
+    {
+        foreach (Type type in types)
+        {
+            AutoRegisterType attribute = type.GetCustomAttribute<AutoRegisterType>()!;
+            if (attribute.Lifetime is ServiceLifetime.Transient)
+            {
+                if (attribute.Key is null)
+                {
+                    services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
+                }
+                else
+                {
+                    services.Add(
+                        new ServiceDescriptor(type, attribute.Key, type, attribute.Lifetime)
+                    );
+                }
+            }
+            else
+            {
+                services.Add(new ServiceDescriptor(type, type, attribute.Lifetime));
+
+                if (attribute.Key is not null)
+                {
+                    services.Add(
+                        new ServiceDescriptor(
+                            type,
+                            attribute.Key,
+                            (sp, _) => sp.GetRequiredService(type),
+                            attribute.Lifetime
+                        )
+                    );
+                }
+            }
+        }
     }
 }

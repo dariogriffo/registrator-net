@@ -58,7 +58,9 @@ services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
 
 
 By default all registered types are registered as `ServiceLifetime.Scoped`, but you can change it by passing a `ServiceLifetime` as a parameter of the attribute.
-
+You can also add keyed services if you use the `Key` property of the attribute.
+~~~~
+~~~~
 ## License
 
 [MIT](https://github.com/dariogriffo/registator-net/blob/main/LICENSE)

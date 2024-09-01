@@ -1,6 +1,12 @@
 Release Notes
 
 
+## [2.0.0](https://github.com/dariogriffo/registator-net/1.1.1)
+
+Target net8.0 only.
+
+Added support for Keyed services
+
 ## [1.1.1](https://github.com/dariogriffo/registator-net/1.1.1)
 
 Updated docs and added a new example to the README.md

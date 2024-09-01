@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registrator.Net", "src\Regi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registrator.Net.Tests", "tests\Registrator.Net.Tests\Registrator.Net.Tests.csproj", "{3E23AD31-68A7-4236-87A5-4EA9572ACE19}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarker", "tests\Benchmarker\Benchmarker.csproj", "{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C0348AC1-9A06-45C2-B1CC-7C7F91229170} = {BA907559-7545-40C5-BF46-D18A8098A5B6}
 		{3E23AD31-68A7-4236-87A5-4EA9572ACE19} = {2B54C5C3-377D-421F-AA0E-EBC09F299FB9}
+		{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E} = {2B54C5C3-377D-421F-AA0E-EBC09F299FB9}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C0348AC1-9A06-45C2-B1CC-7C7F91229170}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -35,5 +38,9 @@ Global
 		{3E23AD31-68A7-4236-87A5-4EA9572ACE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E23AD31-68A7-4236-87A5-4EA9572ACE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E23AD31-68A7-4236-87A5-4EA9572ACE19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C0EF845-D213-4988-BAA9-4DE0A9D7F47E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

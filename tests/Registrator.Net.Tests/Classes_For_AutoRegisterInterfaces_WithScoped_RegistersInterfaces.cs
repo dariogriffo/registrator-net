@@ -3,14 +3,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
 [AutoRegisterInterfaces(ServiceLifetime.Scoped)]
-public class ConcreteType9 : IInterface17, IInterface18
-{
-}
+public class ConcreteType9 : IInterface17, IInterface18 { }
 
-public interface IInterface17
-{
-}
+public interface IInterface17 { }
 
-public interface IInterface18
-{
-}
+public interface IInterface18 { }

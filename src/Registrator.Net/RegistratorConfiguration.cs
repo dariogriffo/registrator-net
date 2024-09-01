@@ -4,7 +4,7 @@ using System;
 using System.Reflection;
 
 /// <summary>
-/// The configuration for the registrator. 
+/// The configuration for the registrator.
 /// </summary>
 public class RegistratorConfiguration
 {
@@ -12,7 +12,7 @@ public class RegistratorConfiguration
     /// Assemblies to scan for types to register.
     /// </summary>
     public Assembly[] Assemblies { get; set; } = Array.Empty<Assembly>();
-    
+
     /// <summary>
     /// Assemblies to exclude interfaces from register on types declared in <see cref="Assemblies"/>.
     /// </summary>

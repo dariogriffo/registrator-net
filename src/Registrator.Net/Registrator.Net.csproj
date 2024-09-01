@@ -8,7 +8,7 @@
         <NeutralLanguage>en-GB</NeutralLanguage>
 
         <!-- Build settings -->
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <DebugType>portable</DebugType>
         <OutputType>Library</OutputType>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -28,8 +28,8 @@
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/dariogriffo/registrator-net</RepositoryUrl>
-        <Version>1.1.1</Version>
-        <AssemblyVersion>1.1.1</AssemblyVersion>
+        <Version>2.0.0</Version>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <!-- SourceLink settings -->
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -56,7 +56,7 @@
 
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.0.0,)" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[8.0.0,)" />
     </ItemGroup>
     
 

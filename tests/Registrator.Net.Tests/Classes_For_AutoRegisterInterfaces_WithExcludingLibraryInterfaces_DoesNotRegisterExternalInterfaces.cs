@@ -1,13 +1,11 @@
 ﻿namespace Registrator.Net.Tests;
 
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
-public class CreateUser : IRequest
-{
-}
+public class CreateUser : IRequest { }
 
 [AutoRegisterInterfaces(ServiceLifetime.Transient)]
 public class ConcreteType10 : IRequestHandler<CreateUser>
@@ -17,4 +15,3 @@ public class ConcreteType10 : IRequestHandler<CreateUser>
         throw new System.NotImplementedException();
     }
 }
-
