@@ -15,30 +15,31 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Automatically registers types in the specified assemblies with the DI container.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="assemblies"></param>
+    /// <param name="services">The <see cref="IServiceCollection"/></param>
+    /// <param name="assemblies">A collection of assemblies to scan to auto register</param>
     /// <returns></returns>
     public static IServiceCollection AutoRegisterTypesInAssemblies(
         this IServiceCollection services,
         params Assembly[] assemblies
     )
     {
-        return services.AutoRegisterTypesInAssemblies(
-            new RegistratorConfiguration() { Assemblies = assemblies }
-        );
+        return services.AutoRegisterTypesInAssemblies(c => c.Assemblies = assemblies);
     }
 
     /// <summary>
     /// Automatically registers types in the specified assemblies with the DI container.
     /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="configuration">The configuration for Registrator</param>
+    /// <param name="services">The <see cref="IServiceCollection"/></param>
+    /// <param name="configurer">The configurator Action to register your types</param>
     /// <returns></returns>
     public static IServiceCollection AutoRegisterTypesInAssemblies(
         this IServiceCollection services,
-        RegistratorConfiguration configuration
+        Action<RegistratorConfiguration> configurer
     )
     {
+        RegistratorConfiguration configuration = new();
+        configurer.Invoke(configuration);
+
         if (configuration.Assemblies.Length == 0)
         {
             return services;
@@ -84,19 +85,19 @@ public static class ServiceCollectionExtensions
                 }
             }
 
-            AutoRegisterTypes(types, services);
+            AutoRegisterTypes(services, types);
 
-            AutoRegisterInterfaces(interfaces, services, excludedInterfaces);
+            AutoRegisterInterfaces(services, interfaces, excludedInterfaces);
 
-            AutoRegisterTypeAndInterfaces(typesAndInterfaces, services, excludedInterfaces);
+            AutoRegisterTypeAndInterfaces(services, typesAndInterfaces, excludedInterfaces);
         }
 
         return services;
     }
 
     private static void AutoRegisterTypeAndInterfaces(
-        List<Type> types,
         IServiceCollection services,
+        List<Type> types,
         HashSet<Type> excludedInterfaces
     )
     {
@@ -147,8 +148,8 @@ public static class ServiceCollectionExtensions
     }
 
     private static void AutoRegisterInterfaces(
-        List<Type> types,
         IServiceCollection services,
+        List<Type> types,
         HashSet<Type> excludedInterfaces
     )
     {
@@ -234,7 +235,7 @@ public static class ServiceCollectionExtensions
         }
     }
 
-    private static void AutoRegisterTypes(List<Type> types, IServiceCollection services)
+    private static void AutoRegisterTypes(IServiceCollection services, List<Type> types)
     {
         foreach (Type type in types)
         {

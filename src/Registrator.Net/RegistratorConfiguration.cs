@@ -6,7 +6,7 @@ using System.Reflection;
 /// <summary>
 /// The configuration for the registrator.
 /// </summary>
-public class RegistratorConfiguration
+public sealed class RegistratorConfiguration
 {
     /// <summary>
     /// Assemblies to scan for types to register.

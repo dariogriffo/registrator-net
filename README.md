@@ -1,4 +1,4 @@
-[![N|Solid](https://avatars2.githubusercontent.com/u/39886363?s=200&v=4)](https://github.com/dariogriffo/registator-net)
+[![N|Solid](https://avatars2.githubusercontent.com/u/39886363?s=200&v=4)](https://github.com/dariogriffo/registrator-net)
 
 # Registrator.Net
 
@@ -6,7 +6,7 @@ A simple yet effective auto registration tool for dotnet
 
 [![NuGet Info](https://img.shields.io/nuget/dt/Registrator.Net)](https://www.nuget.org/packages/Registrator.Net/)
 ![GitHub License](https://img.shields.io/github/license/dariogriffo/registrator-net)
-![CI](https://github.com/dariogriffo/registrator-net/workflows/.NET/badge.svg)
+![CI](https://github.com/dariogriffo/registrator-net/workflows/CI/badge.svg)
 
 
 ## Table of contents
@@ -21,7 +21,7 @@ Doesn't support automatic registration of generic types, you will have to regist
 
 ## About
 
-[Registrator.Net](https://www.nuget.org/packages/Registrator.Net) is a simple AutoRegistration tool for dotnet.
+[Registrator.Net](https://www.nuget.org/packages/Registrator.Net) is a simple auto registration tool for dotnet.
 
 I have been trying to find a simple tool to register my internal dependencies and didn't find any that I liked, so I decided to create my own.
 
@@ -60,7 +60,7 @@ You can also add keyed services if you use the `Key` property of the attribute.
 ~~~~
 ## License
 
-[MIT](https://github.com/dariogriffo/registator-net/blob/main/LICENSE)
+[MIT](https://github.com/dariogriffo/registrator-net/blob/main/LICENSE)
 
 ### Logo
 Logo Provided by [Vecteezy](https://vecteezy.com)

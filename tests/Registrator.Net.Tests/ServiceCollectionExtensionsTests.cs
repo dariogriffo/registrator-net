@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace Registrator.Net.Tests;
 
 using System;
@@ -185,17 +186,11 @@ public class ServiceCollectionExtensionsTests
     public void AutoRegisterInterfaces_WithExcludedAssemblies_DoesNotRegisterExcludedAssembliesInterfaces()
     {
         ServiceCollection services = [];
-        services.AutoRegisterTypesInAssemblies(
-            new RegistratorConfiguration()
-            {
-                Assemblies = [typeof(ConcreteType).Assembly],
-                ExcludedAssemblies =
-                [
-                    typeof(IRequestHandler<>).Assembly,
-                    typeof(IMediator).Assembly,
-                ],
-            }
-        );
+        services.AutoRegisterTypesInAssemblies(c =>
+        {
+            c.Assemblies = [typeof(ConcreteType).Assembly];
+            c.ExcludedAssemblies = [typeof(IRequestHandler<>).Assembly, typeof(IMediator).Assembly];
+        });
 
         ServiceProvider provider = services.BuildServiceProvider();
         IRequestHandler<CreateUser>? handler = provider.GetService<IRequestHandler<CreateUser>>();
