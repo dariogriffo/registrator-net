@@ -2,14 +2,11 @@
 
 # Registrator.Net
 
-A simple yet effective AutoRegistration tool for dotnet
+A simple yet effective auto registration tool for dotnet
 
-[![NuGet Info](https://buildstats.info/nuget/Registrator.Net?includePreReleases=true)](https://www.nuget.org/packages/Registrator.Net/)
-[![GitHub license](https://img.shields.io/github/license/dariogriffo/registator-net.svg)](https://raw.githubusercontent.com/dariogriffo/registator-net/main/LICENSE)
-### Build Status
-![.Net8.0](https://github.com/dariogriffo/registator-net/workflows/.NET/badge.svg?branch=main)
-
-[![Build history](https://buildstats.info/github/chart/dariogriffo/registator-net?branch=main&includeBuildsFromPullRequest=false)](https://github.com/dariogriffo/registator-net/actions?query=branch%3Amain++)
+[![NuGet Info](https://img.shields.io/nuget/dt/Registrator.Net)](https://www.nuget.org/packages/Registrator.Net/)
+![GitHub License](https://img.shields.io/github/license/dariogriffo/registrator-net)
+![CI](https://github.com/dariogriffo/registrator-net/workflows/.NET/badge.svg)
 
 
 ## Table of contents
