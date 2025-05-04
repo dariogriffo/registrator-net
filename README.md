@@ -56,8 +56,12 @@ services.AutoRegisterTypesInAssemblies(new RegistratorConfiguration()
 
 By default all registered types are registered as `ServiceLifetime.Scoped`, but you can change it by passing a `ServiceLifetime` as a parameter of the attribute.
 You can also add keyed services if you use the `Key` property of the attribute.
+~~~~csharp
+[AutoRegisterInterfaces(ServiceLifetime.Scoped, "17")]
+ public class ConcreteType17 : IInterface25, IInterface26 { }
 ~~~~
-~~~~
+In the above the interfaces of the class withh be resolved to ConcreteType17 when requested with the key `17`
+
 ## License
 
 [MIT](https://github.com/dariogriffo/registrator-net/blob/main/LICENSE)
