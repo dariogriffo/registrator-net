@@ -37,6 +37,17 @@ public static class ServiceCollectionExtensions
         Action<RegistratorConfiguration> configurer
     )
     {
+        bool CanRegisterType(Type t, HashSet<string> namespaces, HashSet<string> tags)
+        {
+            string? tag = t.GetCustomAttribute<AutoRegisterType>()?.Tag ??
+                          t.GetCustomAttribute<AutoRegisterInterfaces>()?.Tag ??
+                          t.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()?.Tag;
+            
+            bool canRegisterTypeWithTag = tag is null || tags.Contains(tag);
+
+            return canRegisterTypeWithTag && !namespaces.Contains(t.Namespace ?? string.Empty);
+        }
+
         RegistratorConfiguration configuration = new();
         configurer.Invoke(configuration);
 
@@ -44,6 +55,14 @@ public static class ServiceCollectionExtensions
         {
             return services;
         }
+
+        HashSet<string> excludedNamespaces = configuration.ExcludedTypesNamespaces
+            .Where(t => t.Namespace is not null)
+            .Select(t => t.Namespace ?? string.Empty)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToHashSet();
+
+        HashSet<string> tags = configuration.Tags.ToHashSet();
 
         Assembly[] assemblies = configuration.Assemblies;
 
@@ -69,17 +88,26 @@ public static class ServiceCollectionExtensions
             List<Type> typesAndInterfaces = [];
             foreach (var t in assembly.GetTypes())
             {
-                if (t.GetCustomAttributes<AutoRegisterType>().Any())
+                if (
+                    t.GetCustomAttributes<AutoRegisterType>().Any()
+                    && CanRegisterType(t, excludedNamespaces, tags)
+                )
                 {
                     types.Add(t);
                 }
 
-                if (t.GetCustomAttributes<AutoRegisterInterfaces>().Any())
+                if (
+                    t.GetCustomAttributes<AutoRegisterInterfaces>().Any()
+                    && CanRegisterType(t, excludedNamespaces, tags)
+                )
                 {
                     interfaces.Add(t);
                 }
 
-                if (t.GetCustomAttributes<AutoRegisterTypeAndInterfaces>().Any())
+                if (
+                    t.GetCustomAttributes<AutoRegisterTypeAndInterfaces>().Any()
+                    && CanRegisterType(t, excludedNamespaces, tags)
+                )
                 {
                     typesAndInterfaces.Add(t);
                 }

@@ -8,6 +8,7 @@ using System.Linq;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using ToExclude;
 using Xunit;
 
 public class ServiceCollectionExtensionsTests
@@ -374,5 +375,62 @@ public class ServiceCollectionExtensionsTests
         instance1.Should().Be(instance2);
         instance2.Should().Be(instance3);
         instance4.Should().Be(instance3);
+    }
+    
+    [Fact]
+    public void AutoRegisterTypeAndInterfaces_WithExcludedTypes_DoesNotRegisterExcludedTypes()
+    {
+        ServiceCollection services = [];
+        services.AutoRegisterTypesInAssemblies(c =>
+        {
+            c.Assemblies = [typeof(ConcreteType).Assembly];
+            c.ExcludedTypesNamespaces = [typeof(ClassToExclude)];
+        });
+
+        ServiceProvider provider = services.BuildServiceProvider();
+        IInterfaceToExclude? instance = provider.GetService<IInterfaceToExclude>();
+        ClassToExclude? instance2 = provider.GetService<ClassToExclude>();
+
+        instance.Should().BeNull();
+        instance2.Should().BeNull();
+    }
+    
+    [Fact]
+    public void AutoRegisterTypeAndInterfaces_WithTags_RegistersOnlyTaggedTypesAndTypesWithNoTag()
+    {
+        ServiceCollection services = [];
+        services.AutoRegisterTypesInAssemblies(c =>
+        {
+            c.Assemblies = [typeof(ConcreteType).Assembly];
+            c.Tags = ["tag1"];
+        });
+
+        ServiceProvider provider = services.BuildServiceProvider();
+        IInterfaceAndTypeWithMatchingTags instance1 = provider.GetRequiredService<IInterfaceAndTypeWithMatchingTags>();
+        IInterfaceAndTypeWithNoMatchingTags? instance2 = provider.GetService<IInterfaceAndTypeWithNoMatchingTags>();
+        IInterfaceAndTypeWithNoTags instance3 = provider.GetRequiredService<IInterfaceAndTypeWithNoTags>();
+        
+        IInterfaceWithNoMatchingTags? instance4 = provider.GetService<IInterfaceWithNoMatchingTags>();
+        IInterfaceWithNoTags instance5 = provider.GetRequiredService<IInterfaceWithNoTags>();
+        IInterfaceWithMatchingTags instance6 = provider.GetRequiredService<IInterfaceWithMatchingTags>();
+
+        ConcreteTypeWithMatchingTags instance7 = provider.GetRequiredService<ConcreteTypeWithMatchingTags>();
+        ConcreteTypeWithNoMatchingTags? instance8 = provider.GetService<ConcreteTypeWithNoMatchingTags>();
+        ConcreteTypeWithNoTags instance9 = provider.GetRequiredService<ConcreteTypeWithNoTags>();
+        
+        
+        instance1.Should().NotBeNull();
+        instance2.Should().BeNull();
+        instance3.Should().NotBeNull();
+        
+        instance4.Should().BeNull();
+        instance5.Should().NotBeNull();
+        instance6.Should().NotBeNull();
+        
+        instance7.Should().NotBeNull();
+        instance8.Should().BeNull();
+        instance9.Should().NotBeNull();
+        
+        
     }
 }
