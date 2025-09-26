@@ -26,8 +26,8 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dariogriffo/registrator-net</RepositoryUrl>
-    <Version>3.2.1</Version>
-    <AssemblyVersion>3.2.1</AssemblyVersion>
+    <Version>3.2.2</Version>
+    <AssemblyVersion>3.2.2</AssemblyVersion>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- SourceLink settings -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -53,5 +53,4 @@
       Version="[8.0.0,)"
     />
   </ItemGroup>
-  
 </Project>

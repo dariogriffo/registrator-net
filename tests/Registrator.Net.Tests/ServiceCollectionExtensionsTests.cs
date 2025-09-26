@@ -464,6 +464,5 @@ public class ServiceCollectionExtensionsTests
         noOrderIndex.Should().BeLessThan(order1Index);
         order1Index.Should().BeLessThan(order2Index);
         order2Index.Should().BeLessThan(order3Index);
-
     }
 }
