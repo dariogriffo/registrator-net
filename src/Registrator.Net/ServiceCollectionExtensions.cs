@@ -129,6 +129,14 @@ public static class ServiceCollectionExtensions
         HashSet<Type> excludedInterfaces
     )
     {
+        types.Sort((t1, t2) =>
+        {
+            AutoRegisterTypeAndInterfaces attribute1 =
+                t1.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
+            AutoRegisterTypeAndInterfaces attribute2 =
+                t2.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
+            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+        });
         foreach (Type type in types)
         {
             AutoRegisterTypeAndInterfaces attribute =
@@ -181,6 +189,12 @@ public static class ServiceCollectionExtensions
         HashSet<Type> excludedInterfaces
     )
     {
+        types.Sort((t1, t2) =>
+        {
+            AutoRegisterInterfaces attribute1 = t1.GetCustomAttribute<AutoRegisterInterfaces>()!;
+            AutoRegisterInterfaces attribute2 = t2.GetCustomAttribute<AutoRegisterInterfaces>()!;
+            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+        });
         foreach (Type type in types)
         {
             AutoRegisterInterfaces attribute = type.GetCustomAttribute<AutoRegisterInterfaces>()!;
@@ -265,6 +279,12 @@ public static class ServiceCollectionExtensions
 
     private static void AutoRegisterTypes(IServiceCollection services, List<Type> types)
     {
+        types.Sort((t1, t2) =>
+        {
+            AutoRegisterType attribute1 = t1.GetCustomAttribute<AutoRegisterType>()!;
+            AutoRegisterType attribute2 = t2.GetCustomAttribute<AutoRegisterType>()!;
+            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+        });
         foreach (Type type in types)
         {
             AutoRegisterType attribute = type.GetCustomAttribute<AutoRegisterType>()!;

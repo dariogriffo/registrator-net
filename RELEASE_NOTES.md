@@ -1,6 +1,14 @@
 Release Notes
 =
 
+## [3.2.0](https://github.com/dariogriffo/registrator-net/3.2.0)
+
+Added support for ordering of registrations.
+
+## [3.1.0](https://github.com/dariogriffo/registrator-net/3.1.0)
+
+Added support for tags.
+
 ## [3.0.0](https://github.com/dariogriffo/registrator-net/3.0.0)
 
 Use configurator pattern.

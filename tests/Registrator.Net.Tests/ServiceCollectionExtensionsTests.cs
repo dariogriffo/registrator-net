@@ -430,7 +430,25 @@ public class ServiceCollectionExtensionsTests
         instance7.Should().NotBeNull();
         instance8.Should().BeNull();
         instance9.Should().NotBeNull();
+    }
+    
+    [Fact]
+    public void AutoRegisterTypeAndInterfaces_WithOrder_RegistersTypesInOrder()
+    {
+        ServiceCollection services = [];
+        services.AutoRegisterTypesInAssemblies(c =>
+        {
+            c.Assemblies = [typeof(ConcreteType).Assembly];
+        });
         
+        List<ServiceDescriptor> descriptors = services.ToList();
+        int noOrderIndex = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithNoOrder));
+        int order1Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder1));
+        int order2Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder2));
+        int order3Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder3));
         
+        noOrderIndex.Should().BeLessThan(order1Index);
+        order1Index.Should().BeLessThan(order2Index);
+        order2Index.Should().BeLessThan(order3Index);
     }
 }
