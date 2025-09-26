@@ -11,9 +11,9 @@ public class AutoRegisterInterfaces : Attribute
 {
     internal ServiceLifetime Lifetime { get; }
     internal object? Key { get; }
-    
+
     internal string? Tag { get; }
-    
+
     internal int? Order { get; }
 
     /// <summary>

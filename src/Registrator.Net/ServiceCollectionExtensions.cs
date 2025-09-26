@@ -37,14 +37,9 @@ public static class ServiceCollectionExtensions
         Action<RegistratorConfiguration> configurer
     )
     {
-        bool CanRegisterType(Type t, HashSet<string> namespaces, HashSet<string> tags)
+        bool CanRegisterType(Type t, HashSet<string> namespaces, HashSet<string> tags, string? tag)
         {
-            string? tag = t.GetCustomAttribute<AutoRegisterType>()?.Tag ??
-                          t.GetCustomAttribute<AutoRegisterInterfaces>()?.Tag ??
-                          t.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()?.Tag;
-            
             bool canRegisterTypeWithTag = tag is null || tags.Contains(tag);
-
             return canRegisterTypeWithTag && !namespaces.Contains(t.Namespace ?? string.Empty);
         }
 
@@ -56,13 +51,15 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        HashSet<string> excludedNamespaces = configuration.ExcludedTypesNamespaces
-            .Where(t => t.Namespace is not null)
-            .Select(t => t.Namespace ?? string.Empty)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .ToHashSet();
+        HashSet<string> excludedNamespaces = new(
+            configuration
+                .ExcludedTypesNamespaces.Where(t => t.Namespace is not null)
+                .Select(t => t.Namespace ?? string.Empty)
+                .Where(n => !string.IsNullOrWhiteSpace(n)),
+            StringComparer.Ordinal
+        );
 
-        HashSet<string> tags = configuration.Tags.ToHashSet();
+        HashSet<string> tags = new(configuration.Tags, StringComparer.Ordinal);
 
         Assembly[] assemblies = configuration.Assemblies;
 
@@ -72,41 +69,60 @@ public static class ServiceCollectionExtensions
             )
             .Distinct();
 
-        HashSet<Type> excludedInterfaces =
-        [
+        HashSet<Type> excludedInterfaces = new()
+        {
             typeof(IDisposable),
             typeof(IAsyncDisposable),
             typeof(ISerializable),
-        ];
-
+        };
         excludedInterfaces.UnionWith(excludedInterfacesFromInterfaces);
 
         foreach (Assembly assembly in assemblies)
         {
-            List<Type> types = [];
-            List<Type> interfaces = [];
-            List<Type> typesAndInterfaces = [];
-            foreach (var t in assembly.GetTypes())
+            List<Type> types = new();
+            List<Type> interfaces = new();
+            List<Type> typesAndInterfaces = new();
+            foreach (Type t in assembly.GetTypes())
             {
-                if (
-                    t.GetCustomAttributes<AutoRegisterType>().Any()
-                    && CanRegisterType(t, excludedNamespaces, tags)
-                )
+                // Filter early: only public, non-abstract, class types
+                if (!t.IsClass || t.IsAbstract || !t.IsPublic)
+                    continue;
+
+                object[] attrs = t.GetCustomAttributes(false);
+                AutoRegisterType? autoTypeAttr = null;
+                AutoRegisterInterfaces? autoInterfacesAttr = null;
+                AutoRegisterTypeAndInterfaces? autoTypeAndInterfacesAttr = null;
+                string? tag = null;
+                foreach (object attr in attrs)
+                {
+                    if (attr is AutoRegisterType art)
+                    {
+                        autoTypeAttr = art;
+                        tag = art.Tag;
+                    }
+                    else if (attr is AutoRegisterInterfaces ari)
+                    {
+                        autoInterfacesAttr = ari;
+                        tag ??= ari.Tag;
+                    }
+                    else if (attr is AutoRegisterTypeAndInterfaces arta)
+                    {
+                        autoTypeAndInterfacesAttr = arta;
+                        tag ??= arta.Tag;
+                    }
+                }
+
+                if (autoTypeAttr != null && CanRegisterType(t, excludedNamespaces, tags, tag))
                 {
                     types.Add(t);
                 }
-
-                if (
-                    t.GetCustomAttributes<AutoRegisterInterfaces>().Any()
-                    && CanRegisterType(t, excludedNamespaces, tags)
-                )
+                if (autoInterfacesAttr != null && CanRegisterType(t, excludedNamespaces, tags, tag))
                 {
                     interfaces.Add(t);
                 }
-
                 if (
-                    t.GetCustomAttributes<AutoRegisterTypeAndInterfaces>().Any()
-                    && CanRegisterType(t, excludedNamespaces, tags)
+                    autoTypeAndInterfacesAttr != null
+                    && CanRegisterType(t, excludedNamespaces, tags, tag)
                 )
                 {
                     typesAndInterfaces.Add(t);
@@ -114,9 +130,7 @@ public static class ServiceCollectionExtensions
             }
 
             AutoRegisterTypes(services, types);
-
             AutoRegisterInterfaces(services, interfaces, excludedInterfaces);
-
             AutoRegisterTypeAndInterfaces(services, typesAndInterfaces, excludedInterfaces);
         }
 
@@ -129,14 +143,23 @@ public static class ServiceCollectionExtensions
         HashSet<Type> excludedInterfaces
     )
     {
-        types.Sort((t1, t2) =>
+        // Only sort if more than one type and Order is not always null
+        if (
+            types.Count > 1
+            && types.Any(t => t.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()?.Order != null)
+        )
         {
-            AutoRegisterTypeAndInterfaces attribute1 =
-                t1.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
-            AutoRegisterTypeAndInterfaces attribute2 =
-                t2.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
-            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
-        });
+            types.Sort(
+                (t1, t2) =>
+                {
+                    AutoRegisterTypeAndInterfaces attribute1 =
+                        t1.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
+                    AutoRegisterTypeAndInterfaces attribute2 =
+                        t2.GetCustomAttribute<AutoRegisterTypeAndInterfaces>()!;
+                    return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+                }
+            );
+        }
         foreach (Type type in types)
         {
             AutoRegisterTypeAndInterfaces attribute =
@@ -147,15 +170,19 @@ public static class ServiceCollectionExtensions
                     : new ServiceDescriptor(type, attribute.Key, type, attribute.Lifetime)
             );
 
-            List<Type> interfacesToRegister = type.GetInterfaces()
-                .Where(@interface => !excludedInterfaces.Contains(@interface))
-                .Where(@interface =>
-                    !(
-                        @interface.IsGenericType
-                        && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
-                    )
+            Type[] allInterfaces = type.GetInterfaces();
+            List<Type> interfacesToRegister = new(allInterfaces.Length);
+            foreach (Type @interface in allInterfaces)
+            {
+                if (excludedInterfaces.Contains(@interface))
+                    continue;
+                if (
+                    @interface.IsGenericType
+                    && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
                 )
-                .ToList();
+                    continue;
+                interfacesToRegister.Add(@interface);
+            }
             foreach (Type @interface in interfacesToRegister)
             {
                 if (attribute.Key is null)
@@ -189,24 +216,38 @@ public static class ServiceCollectionExtensions
         HashSet<Type> excludedInterfaces
     )
     {
-        types.Sort((t1, t2) =>
+        if (
+            types.Count > 1
+            && types.Any(t => t.GetCustomAttribute<AutoRegisterInterfaces>()?.Order != null)
+        )
         {
-            AutoRegisterInterfaces attribute1 = t1.GetCustomAttribute<AutoRegisterInterfaces>()!;
-            AutoRegisterInterfaces attribute2 = t2.GetCustomAttribute<AutoRegisterInterfaces>()!;
-            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
-        });
+            types.Sort(
+                (t1, t2) =>
+                {
+                    AutoRegisterInterfaces attribute1 =
+                        t1.GetCustomAttribute<AutoRegisterInterfaces>()!;
+                    AutoRegisterInterfaces attribute2 =
+                        t2.GetCustomAttribute<AutoRegisterInterfaces>()!;
+                    return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+                }
+            );
+        }
         foreach (Type type in types)
         {
             AutoRegisterInterfaces attribute = type.GetCustomAttribute<AutoRegisterInterfaces>()!;
-            List<Type> interfacesToRegister = type.GetInterfaces()
-                .Where(@interface => !excludedInterfaces.Contains(@interface))
-                .Where(@interface =>
-                    !(
-                        @interface.IsGenericType
-                        && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
-                    )
+            Type[] allInterfaces = type.GetInterfaces();
+            List<Type> interfacesToRegister = new(allInterfaces.Length);
+            foreach (Type @interface in allInterfaces)
+            {
+                if (excludedInterfaces.Contains(@interface))
+                    continue;
+                if (
+                    @interface.IsGenericType
+                    && excludedInterfaces.Contains(@interface.GetGenericTypeDefinition())
                 )
-                .ToList();
+                    continue;
+                interfacesToRegister.Add(@interface);
+            }
 
             if (attribute.Lifetime == ServiceLifetime.Transient)
             {
@@ -279,12 +320,20 @@ public static class ServiceCollectionExtensions
 
     private static void AutoRegisterTypes(IServiceCollection services, List<Type> types)
     {
-        types.Sort((t1, t2) =>
+        if (
+            types.Count > 1
+            && types.Any(t => t.GetCustomAttribute<AutoRegisterType>()?.Order != null)
+        )
         {
-            AutoRegisterType attribute1 = t1.GetCustomAttribute<AutoRegisterType>()!;
-            AutoRegisterType attribute2 = t2.GetCustomAttribute<AutoRegisterType>()!;
-            return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
-        });
+            types.Sort(
+                (t1, t2) =>
+                {
+                    AutoRegisterType attribute1 = t1.GetCustomAttribute<AutoRegisterType>()!;
+                    AutoRegisterType attribute2 = t2.GetCustomAttribute<AutoRegisterType>()!;
+                    return attribute1.Order?.CompareTo(attribute2.Order) ?? 0;
+                }
+            );
+        }
         foreach (Type type in types)
         {
             AutoRegisterType attribute = type.GetCustomAttribute<AutoRegisterType>()!;

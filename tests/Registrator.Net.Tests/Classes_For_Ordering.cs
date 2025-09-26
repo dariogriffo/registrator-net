@@ -2,10 +2,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-
 [AutoRegisterType(ServiceLifetime.Transient)]
 public class ConcreteTypeWithNoOrder { }
-
 
 [AutoRegisterType(ServiceLifetime.Transient, order: 1)]
 public class ConcreteTypeWithOrder1 { }

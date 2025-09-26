@@ -376,7 +376,7 @@ public class ServiceCollectionExtensionsTests
         instance2.Should().Be(instance3);
         instance4.Should().Be(instance3);
     }
-    
+
     [Fact]
     public void AutoRegisterTypeAndInterfaces_WithExcludedTypes_DoesNotRegisterExcludedTypes()
     {
@@ -394,7 +394,7 @@ public class ServiceCollectionExtensionsTests
         instance.Should().BeNull();
         instance2.Should().BeNull();
     }
-    
+
     [Fact]
     public void AutoRegisterTypeAndInterfaces_WithTags_RegistersOnlyTaggedTypesAndTypesWithNoTag()
     {
@@ -406,32 +406,38 @@ public class ServiceCollectionExtensionsTests
         });
 
         ServiceProvider provider = services.BuildServiceProvider();
-        IInterfaceAndTypeWithMatchingTags instance1 = provider.GetRequiredService<IInterfaceAndTypeWithMatchingTags>();
-        IInterfaceAndTypeWithNoMatchingTags? instance2 = provider.GetService<IInterfaceAndTypeWithNoMatchingTags>();
-        IInterfaceAndTypeWithNoTags instance3 = provider.GetRequiredService<IInterfaceAndTypeWithNoTags>();
-        
-        IInterfaceWithNoMatchingTags? instance4 = provider.GetService<IInterfaceWithNoMatchingTags>();
-        IInterfaceWithNoTags instance5 = provider.GetRequiredService<IInterfaceWithNoTags>();
-        IInterfaceWithMatchingTags instance6 = provider.GetRequiredService<IInterfaceWithMatchingTags>();
+        IInterfaceAndTypeWithMatchingTags instance1 =
+            provider.GetRequiredService<IInterfaceAndTypeWithMatchingTags>();
+        IInterfaceAndTypeWithNoMatchingTags? instance2 =
+            provider.GetService<IInterfaceAndTypeWithNoMatchingTags>();
+        IInterfaceAndTypeWithNoTags instance3 =
+            provider.GetRequiredService<IInterfaceAndTypeWithNoTags>();
 
-        ConcreteTypeWithMatchingTags instance7 = provider.GetRequiredService<ConcreteTypeWithMatchingTags>();
-        ConcreteTypeWithNoMatchingTags? instance8 = provider.GetService<ConcreteTypeWithNoMatchingTags>();
+        IInterfaceWithNoMatchingTags? instance4 =
+            provider.GetService<IInterfaceWithNoMatchingTags>();
+        IInterfaceWithNoTags instance5 = provider.GetRequiredService<IInterfaceWithNoTags>();
+        IInterfaceWithMatchingTags instance6 =
+            provider.GetRequiredService<IInterfaceWithMatchingTags>();
+
+        ConcreteTypeWithMatchingTags instance7 =
+            provider.GetRequiredService<ConcreteTypeWithMatchingTags>();
+        ConcreteTypeWithNoMatchingTags? instance8 =
+            provider.GetService<ConcreteTypeWithNoMatchingTags>();
         ConcreteTypeWithNoTags instance9 = provider.GetRequiredService<ConcreteTypeWithNoTags>();
-        
-        
+
         instance1.Should().NotBeNull();
         instance2.Should().BeNull();
         instance3.Should().NotBeNull();
-        
+
         instance4.Should().BeNull();
         instance5.Should().NotBeNull();
         instance6.Should().NotBeNull();
-        
+
         instance7.Should().NotBeNull();
         instance8.Should().BeNull();
         instance9.Should().NotBeNull();
     }
-    
+
     [Fact]
     public void AutoRegisterTypeAndInterfaces_WithOrder_RegistersTypesInOrder()
     {
@@ -440,13 +446,21 @@ public class ServiceCollectionExtensionsTests
         {
             c.Assemblies = [typeof(ConcreteType).Assembly];
         });
-        
+
         List<ServiceDescriptor> descriptors = services.ToList();
-        int noOrderIndex = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithNoOrder));
-        int order1Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder1));
-        int order2Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder2));
-        int order3Index = descriptors.FindIndex(d => d.ServiceType == typeof(ConcreteTypeWithOrder3));
-        
+        int noOrderIndex = descriptors.FindIndex(d =>
+            d.ServiceType == typeof(ConcreteTypeWithNoOrder)
+        );
+        int order1Index = descriptors.FindIndex(d =>
+            d.ServiceType == typeof(ConcreteTypeWithOrder1)
+        );
+        int order2Index = descriptors.FindIndex(d =>
+            d.ServiceType == typeof(ConcreteTypeWithOrder2)
+        );
+        int order3Index = descriptors.FindIndex(d =>
+            d.ServiceType == typeof(ConcreteTypeWithOrder3)
+        );
+
         noOrderIndex.Should().BeLessThan(order1Index);
         order1Index.Should().BeLessThan(order2Index);
         order2Index.Should().BeLessThan(order3Index);

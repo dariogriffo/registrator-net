@@ -17,7 +17,7 @@ public sealed class RegistratorConfiguration
     /// Assemblies to exclude interfaces from register on types declared in <see cref="Assemblies"/>.
     /// </summary>
     public Assembly[] ExcludedAssemblies { get; set; } = [];
-    
+
     /// <summary>
     /// Namespaces to exclude from register declared in <see cref="Assemblies"/>.
     /// Example, given a class with fully qualified name "MyCompany.Services.MyService"
@@ -25,7 +25,7 @@ public sealed class RegistratorConfiguration
     /// ExcludedNamespaces = [typeof(MyService)]
     /// </summary>
     public Type[] ExcludedTypesNamespaces { get; set; } = [];
-    
+
     /// <summary>
     /// Tags to filter the registration of types.
     /// When provided only types with the no tag or matching will be registered.

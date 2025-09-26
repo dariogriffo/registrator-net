@@ -22,8 +22,8 @@ public class AutoRegisterType : Attribute
     /// <param name="tag">An optional tag to register the type. The type will be registered only if the tag is null or present in the <see cref="RegistratorConfiguration.Tags"/> </param>
     /// <param name="order">An optional order to register the type. The types will be registered in ascending order</param>
     public AutoRegisterType(
-        ServiceLifetime lifetime = ServiceLifetime.Scoped, 
-        object? key = null, 
+        ServiceLifetime lifetime = ServiceLifetime.Scoped,
+        object? key = null,
         string? tag = null,
         int order = -1
     )
