@@ -1,6 +1,10 @@
 Release Notes
 =
 
+## [3.2.2](https://github.com/dariogriffo/registrator-net/3.2.2)
+
+Rollback a change that caused issues with some DI containers.
+
 ## [3.2.1](https://github.com/dariogriffo/registrator-net/3.2.1)
 
 Performance improvements

@@ -91,21 +91,6 @@ public class ConcreteTypeWithNoTags : IInterfaceAndTypeWithNoTags { }
 
 In the above example, only `ConcreteTypeWithMatchingTags` and `ConcreteTypeWithNoTags` will be registered.
 
-### Ordering
-You can order the registration of your types by using the `order` property of the attributes. The types will be registered in ascending order.
-Example:
-~~~~csharp
-[AutoRegisterType(ServiceLifetime.Transient, order: 1)]
-public class ConcreteTypeWithOrder1 { }
-
-[AutoRegisterType(ServiceLifetime.Transient, order: 2)]
-public class ConcreteTypeWithOrder2 { }
-
-[AutoRegisterType(ServiceLifetime.Transient, order: 3)]
-public class ConcreteTypeWithOrder3 { }
-~~~~
-
-
 ### Excluding types from registration by namespace
 
 You can exclude types from registration by namespace by using the `ExcludedTypesNamespaces` property of the `RegistratorConfiguration` class.

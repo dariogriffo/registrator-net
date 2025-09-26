@@ -33,6 +33,6 @@ public class AutoRegisterInterfaces : Attribute
         Lifetime = lifetime;
         Key = key;
         Tag = tag;
-        Order = order == -1 ? null : order;
+        Order = order;
     }
 }
