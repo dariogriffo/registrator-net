@@ -1,7 +1,7 @@
 Release Notes
 =
 
-## [3.2.3](https://github.com/dariogriffo/registrator-net/3.2.3)
+## [3.2.4](https://github.com/dariogriffo/registrator-net/3.2.4)
 
 Fix regression with internals
 
