@@ -31,6 +31,6 @@ public class AutoRegisterType : Attribute
         Lifetime = lifetime;
         Key = key;
         Tag = tag;
-        Order = order;
+        Order = order == -1 ? null : order;
     }
 }
