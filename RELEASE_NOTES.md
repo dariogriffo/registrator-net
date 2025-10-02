@@ -1,6 +1,14 @@
 Release Notes
 =
 
+## [3.2.3](https://github.com/dariogriffo/registrator-net/3.2.3)
+
+Fix regression with internals
+
+## [3.2.2](https://github.com/dariogriffo/registrator-net/3.2.2)
+
+Added support for excluding types by namespace.
+
 ## [3.2.1](https://github.com/dariogriffo/registrator-net/3.2.1)
 
 Performance improvements

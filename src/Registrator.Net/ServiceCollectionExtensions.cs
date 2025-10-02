@@ -84,9 +84,11 @@ public static class ServiceCollectionExtensions
             List<Type> typesAndInterfaces = new();
             foreach (Type t in assembly.GetTypes())
             {
-                // Filter early: only public, non-abstract, class types
-                if (!t.IsClass || t.IsAbstract || !t.IsPublic)
+               
+                if (t.IsAbstract || t.IsInterface)
+                {
                     continue;
+                }
 
                 object[] attrs = t.GetCustomAttributes(false);
                 AutoRegisterType? autoTypeAttr = null;
